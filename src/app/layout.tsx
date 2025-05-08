@@ -27,7 +27,9 @@ export default function RootLayout({
     <body
     className={`${geologica.className} antialiased`}
     >
-    <Navbar />
+    <div className="w-full fixed z-30">
+      <Navbar />
+    </div>
     {children}
     </body>
   </html>

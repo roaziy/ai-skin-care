@@ -10,13 +10,46 @@ export default function DesktopNavbar() {
     const [hovered, setHovered] = useState<number | null>(null);
     const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const [screenWidth, setScreenWidth] = useState<number>(0);
 
     const pathname = usePathname();
     const router = useRouter();
 
-    // Update these to match the actual number of nav items (4 items)
-    const widths = [78, 80, 112, 144];
+    // Update widths to accommodate longer text
+    // Increased the last value for "Холбоо барих"
+    const widths = [78, 80, 112, 160];
+    // Adjusted positions to match new widths
     const positions = [4, 76, 154, 265];   
+
+    useEffect(() => {
+        // Set initial screen width
+        setScreenWidth(window.innerWidth);
+
+        // Add resize listener
+        const handleResize = () => {
+            setScreenWidth(window.innerWidth);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Calculate adjusted widths based on screen size
+    const getAdjustedWidth = (index: number) => {
+        // Apply scaling factor for smaller screens 
+        if (screenWidth < 1200 && index === 3) { // For "Холбоо барих"
+            return widths[index] + 20; // Add extra space for smaller screens
+        }
+        return widths[index];
+    };
+
+    // Calculate adjusted positions based on screen size
+    const getAdjustedPosition = (index: number) => {
+        if (screenWidth < 1200 && index === 3) {
+            return positions[index] - 10; // Adjust position on smaller screens
+        }
+        return positions[index];
+    };
 
     useEffect(() => {
         // Check if path matches any nav item anchor
@@ -62,8 +95,8 @@ export default function DesktopNavbar() {
                         className="absolute rounded-full bg-[#dadada]"
                         initial={false}
                         animate={{ 
-                            left: positions[selected] || 0,
-                            width: widths[selected] || 80
+                            left: getAdjustedPosition(selected),
+                            width: getAdjustedWidth(selected)
                         }}
                         transition={{ type: 'spring', stiffness: 150, damping: 20 }}
                         style={{
@@ -82,7 +115,7 @@ export default function DesktopNavbar() {
                         <motion.button
                             className={`relative z-10 px-4 py-2 text-[16px] transition-colors select-none ${
                                 selected === index ? 'text-black' : 'text-gray-500 hover:text-black'
-                            }`}
+                            } whitespace-nowrap`}
                             onClick={() => handleNavClick(index)}
                             whileTap={{ scale: 0.95 }}
                             whileHover={{ scale: 1.05 }}
